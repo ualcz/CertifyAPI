@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <style>
+        @page {
+            size: A4 landscape;
+            margin: 0;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Times New Roman', serif;
+        }
+
+        .certificate {
+            width: 297mm;
+            height: 210mm;
+            padding: 30mm;
+            box-sizing: border-box;
+            position: relative;
+            background: #fdfbf7;
+            border: 20px solid #8b7355;
+        }
+
+        .ornament-border {
+            position: absolute;
+            top: 25px;
+            left: 25px;
+            right: 25px;
+            bottom: 25px;
+            border: 3px double #d4af37;
+            padding: 20px;
+        }
+
+        .corner-ornament {
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            border: 2px solid #d4af37;
+        }
+
+        .corner-ornament.top-left {
+            top: 15px;
+            left: 15px;
+            border-right: none;
+            border-bottom: none;
+        }
+
+        .corner-ornament.top-right {
+            top: 15px;
+            right: 15px;
+            border-left: none;
+            border-bottom: none;
+        }
+
+        .corner-ornament.bottom-left {
+            bottom: 15px;
+            left: 15px;
+            border-right: none;
+            border-top: none;
+        }
+
+        .corner-ornament.bottom-right {
+            bottom: 15px;
+            right: 15px;
+            border-left: none;
+            border-top: none;
+        }
+
+        .seal {
+            position: absolute;
+            top: 50%;
+            left: 40px;
+            transform: translateY(-50%);
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            border: 5px solid #d4af37;
+            background: radial-gradient(circle, #f4e4c1 0%, #d4af37 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
+            color: #8b7355;
+            text-align: center;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .content {
+            text-align: center;
+            position: relative;
+            z-index: 1;
+            padding: 0 80px;
+        }
+
+        .title {
+            font-size: 60px;
+            color: #8b7355;
+            font-weight: bold;
+            margin: 20px 0;
+            text-transform: uppercase;
+            letter-spacing: 5px;
+            font-style: italic;
+        }
+
+        .subtitle {
+            font-size: 20px;
+            color: #a0826d;
+            margin: 10px 0 40px 0;
+            font-style: italic;
+        }
+
+        .certify-text {
+            font-size: 18px;
+            color: #5d4e37;
+            margin: 25px 0;
+            font-style: italic;
+        }
+
+        .student-name {
+            font-size: 42px;
+            color: #2c1810;
+            font-weight: bold;
+            margin: 25px 0;
+            border-bottom: 3px solid #d4af37;
+            display: inline-block;
+            padding: 10px 50px;
+            font-style: italic;
+        }
+
+        .cpf {
+            font-size: 16px;
+            color: #8b7355;
+            margin: 15px 0;
+        }
+
+        .course-name {
+            font-size: 32px;
+            color: #5d4e37;
+            font-weight: bold;
+            margin: 30px 0;
+            font-style: italic;
+        }
+
+        .details {
+            font-size: 18px;
+            color: #5d4e37;
+            margin: 15px 0;
+        }
+
+        .footer {
+            position: absolute;
+            bottom: 35mm;
+            left: 35mm;
+            right: 35mm;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+        }
+
+        .validation {
+            text-align: left;
+            font-size: 13px;
+            color: #8b7355;
+        }
+
+        .date {
+            text-align: right;
+            font-size: 16px;
+            color: #5d4e37;
+        }
+
+        .uuid {
+            font-family: 'Courier New', monospace;
+            background: #f4e4c1;
+            padding: 5px 10px;
+            border-radius: 4px;
+            margin-top: 5px;
+            display: inline-block;
+            border: 1px solid #d4af37;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="certificate">
+        <div class="ornament-border">
+            <div class="corner-ornament top-left"></div>
+            <div class="corner-ornament top-right"></div>
+            <div class="corner-ornament bottom-left"></div>
+            <div class="corner-ornament bottom-right"></div>
+        </div>
+
+        <div class="seal">
+            OFFICIAL<br>SEAL
+        </div>
+
+        <div class="content">
+            <h1 class="title">Certificado</h1>
+            <p class="subtitle">Certificado de Mérito Acadêmico</p>
+
+            <p class="certify-text">Outorga-se o presente certificado a</p>
+
+            <div class="student-name">{{ student_name }}</div>
+
+            <p class="cpf">CPF: {{ student_cpf }}</p>
+
+            <p class="certify-text">em reconhecimento à conclusão do curso</p>
+
+            <div class="course-name">{{ course_name }}</div>
+
+            <p class="details">Carga Horária: {{ course_workload }} horas</p>
+
+            {% if course_description %}
+            <p class="details" style="font-size: 16px; color: #8b7355;">{{ course_description }}</p>
+            {% endif %}
+        </div>
+
+        <div class="footer">
+            <div class="validation">
+                <p style="margin: 0;">Código de Autenticidade:</p>
+                <span class="uuid">{{ validation_uuid }}</span>
+            </div>
+
+            <div class="date">
+                <p style="margin: 0;">Emitido em:</p>
+                <p style="margin: 5px 0 0 0; font-weight: bold;">{{ issue_date }}</p>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

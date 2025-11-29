@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CertifyAPI - Área do Estudante</title>
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="/static/css/main.css">
+    <link rel="stylesheet" href="/static/css/components.css">
+    <link rel="stylesheet" href="/static/css/modules.css">
+</head>
+
+<body>
+    <!-- Header -->
+    <header class="app-header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <h1>🎓 CertifyAPI <span class="badge badge-modern">Estudante</span></h1>
+                </div>
+                <div class="header-actions">
+                    <div id="auth-status"></div>
+                    <button id="logout-btn" class="btn btn-secondary">
+                        Sair
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Navigation -->
+    <nav class="main-nav">
+        <div class="container">
+            <div class="nav-tabs">
+                <button class="nav-tab active" data-tab-target="enrollments">
+                    Minhas Inscrições
+                </button>
+                <button class="nav-tab" data-tab-target="certificates">
+                    Meus Certificados
+                </button>
+                <button class="nav-tab" data-tab-target="profile">
+                    Meu Perfil
+                </button>
+                <button class="nav-tab" data-tab-target="validate">
+                    Validar Certificado
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="container">
+            <!-- Enrollments Tab -->
+            <div class="tab-content active" id="enrollments-content"></div>
+
+            <!-- Certificates Tab (Modified for Student) -->
+            <div class="tab-content" id="certificates-content">
+                <div class="certificates-container">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3>Meus Certificados</h3>
+                        </div>
+                        <div class="card-body" id="my-certificates-list">
+                            <p class="text-muted">Carregando...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Profile Tab -->
+            <div class="tab-content" id="profile-content">
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Atualizar Perfil</h3>
+                    </div>
+                    <div class="card-body">
+                        <form id="profile-form">
+                            <div class="form-group">
+                                <label for="profile-name">Nome</label>
+                                <input type="text" id="profile-name" class="form-control"
+                                    placeholder="Seu nome completo">
+                            </div>
+                            <div class="form-group">
+                                <label for="profile-email">Email</label>
+                                <input type="email" id="profile-email" class="form-control" placeholder="seu@email.com">
+                            </div>
+                            <div class="form-group">
+                                <label for="profile-password">Nova Senha (opcional)</label>
+                                <input type="password" id="profile-password" class="form-control"
+                                    placeholder="Deixe em branco para manter a senha atual" minlength="6">
+                                <small class="form-text text-muted">Mínimo 6 caracteres</small>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Salvar Alterações</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Validate Tab -->
+            <div class="tab-content" id="validate-content"></div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="app-footer">
+        <div class="container">
+            <p>&copy; 2024 CertifyAPI. Área do Estudante.</p>
+        </div>
+    </footer>
+
+    <!-- Core Scripts -->
+    <script src="/static/js/config.js"></script>
+    <script src="/static/js/auth.js"></script>
+    <script src="/static/js/api.js"></script>
+    <script src="/static/js/notifications.js"></script>
+    <script src="/static/js/ui.js"></script>
+
+    <!-- Module Scripts -->
+    <script src="/static/js/modules/enrollments-module.js"></script>
+    <script src="/static/js/modules/validate-module.js"></script>
+
+    <!-- Main App Script -->
+    <script>
+        // Check Auth
+        if (!AuthManager.isAuthenticated() || !AuthManager.isStudent()) {
+            window.location.href = '/static/index.html';
+        }
+
+        // Logout
+        document.getElementById('logout-btn').addEventListener('click', () => {
+            AuthManager.logout();
+            window.location.href = '/static/index.html';
+        });
+
+        // Load My Certificates
+        async function loadMyCertificates() {
+            const container = document.getElementById('my-certificates-list');
+            try {
+                const certificates = await ApiClient.get(API_CONFIG.ENDPOINTS.STUDENTS.MY_CERTIFICATES);
+
+                if (certificates.length === 0) {
+                    container.innerHTML = '<p class="text-muted">Você ainda não possui certificados.</p>';
+                    return;
+                }
+
+                container.innerHTML = certificates.map(cert => `
+                    <div class="certificate-item card">
+                        <h5>${cert.course_name}</h5>
+                        <p>Emitido em: ${UI.formatDate(cert.issue_date)}</p>
+                        <p>UUID: <code>${cert.uuid}</code></p>
+                        <button class="btn btn-sm btn-primary" 
+                                onclick="ApiClient.downloadFile('${cert.download_url}', 'certificado_${cert.certificate_id}.pdf')">
+                            Download PDF
+                        </button>
+                    </div>
+                `).join('');
+            } catch (error) {
+                container.innerHTML = '<p class="text-danger">Erro ao carregar certificados.</p>';
+            }
+        }
+
+        // Load Profile
+        async function loadProfile() {
+            try {
+                const student = await ApiClient.get(API_CONFIG.ENDPOINTS.STUDENTS.ME);
+                document.getElementById('profile-name').value = student.name;
+                document.getElementById('profile-email').value = student.email;
+            } catch (error) {
+                Notifications.error('Erro ao carregar perfil');
+            }
+        }
+
+        // Update Profile
+        document.getElementById('profile-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const data = {
+                name: document.getElementById('profile-name').value,
+                email: document.getElementById('profile-email').value,
+            };
+
+            const password = document.getElementById('profile-password').value;
+            if (password) {
+                data.password = password;
+            }
+
+            try {
+                await ApiClient.put(API_CONFIG.ENDPOINTS.STUDENTS.UPDATE_PROFILE, data);
+                Notifications.success('Perfil atualizado com sucesso!');
+                document.getElementById('profile-password').value = '';
+            } catch (error) {
+                Notifications.error(error.message || 'Erro ao atualizar perfil');
+            }
+        });
+
+        // Tab Navigation
+        document.addEventListener('DOMContentLoaded', () => {
+            const navTabs = document.querySelectorAll('.nav-tab');
+            const tabContents = document.querySelectorAll('.tab-content');
+
+            navTabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    const target = tab.dataset.tabTarget;
+
+                    navTabs.forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+
+                    tabContents.forEach(c => c.classList.remove('active'));
+                    const targetContent = document.getElementById(`${target}-content`);
+                    if (targetContent) {
+                        targetContent.classList.add('active');
+                        initializeModule(target);
+                    }
+                });
+            });
+
+            // Init default
+            initializeModule('enrollments');
+        });
+
+        function initializeModule(moduleName) {
+            switch (moduleName) {
+                case 'enrollments':
+                    if (window.EnrollmentsModule) EnrollmentsModule.init();
+                    break;
+                case 'certificates':
+                    loadMyCertificates();
+                    break;
+                case 'profile':
+                    loadProfile();
+                    break;
+                case 'validate':
+                    if (window.ValidateModule) ValidateModule.init();
+                    break;
+            }
+        }
+    </script>
+</body>
+
+</html>

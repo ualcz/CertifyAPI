@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CertifyAPI - Administração</title>
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="/static/css/main.css">
+    <link rel="stylesheet" href="/static/css/components.css">
+    <link rel="stylesheet" href="/static/css/modules.css">
+</head>
+
+<body>
+    <!-- Header -->
+    <header class="app-header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <h1>🎓 CertifyAPI <span class="badge badge-modern">Admin</span></h1>
+                </div>
+                <div class="header-actions">
+                    <div id="auth-status"></div>
+                    <button id="logout-btn" class="btn btn-secondary">
+                        Sair
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Navigation -->
+    <nav class="main-nav">
+        <div class="container">
+            <div class="nav-tabs">
+                <button class="nav-tab active" data-tab-target="courses">
+                    Cursos
+                </button>
+                <button class="nav-tab" data-tab-target="classes">
+                    Turmas
+                </button>
+                <button class="nav-tab" data-tab-target="certificates">
+                    Certificados
+                </button>
+                <button class="nav-tab" data-tab-target="validate">
+                    Validação
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="container">
+            <!-- Courses Tab -->
+            <div class="tab-content active" id="courses-content"></div>
+
+            <!-- Classes Tab -->
+            <div class="tab-content" id="classes-content"></div>
+
+            <!-- Certificates Tab -->
+            <div class="tab-content" id="certificates-content"></div>
+
+            <!-- Validate Tab -->
+            <div class="tab-content" id="validate-content"></div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="app-footer">
+        <div class="container">
+            <p>&copy; 2024 CertifyAPI. Painel Administrativo.</p>
+        </div>
+    </footer>
+
+    <!-- Core Scripts -->
+    <script src="/static/js/config.js"></script>
+    <script src="/static/js/auth.js"></script>
+    <script src="/static/js/api.js"></script>
+    <script src="/static/js/notifications.js"></script>
+    <script src="/static/js/ui.js"></script>
+
+    <!-- Module Scripts -->
+    <script src="/static/js/modules/courses-module.js"></script>
+    <script src="/static/js/modules/classes-module.js"></script>
+    <script src="/static/js/modules/certificates-module.js"></script>
+    <script src="/static/js/modules/validate-module.js"></script>
+
+    <!-- Main App Script -->
+    <script>
+        // Check Auth
+        if (!AuthManager.isAuthenticated() || !AuthManager.isAdmin()) {
+            window.location.href = '/static/index.html';
+        }
+
+        // Logout
+        document.getElementById('logout-btn').addEventListener('click', () => {
+            AuthManager.logout();
+            window.location.href = '/static/index.html';
+        });
+
+        // Tab Navigation
+        document.addEventListener('DOMContentLoaded', () => {
+            const navTabs = document.querySelectorAll('.nav-tab');
+            const tabContents = document.querySelectorAll('.tab-content');
+
+            navTabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    const target = tab.dataset.tabTarget;
+
+                    navTabs.forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+
+                    tabContents.forEach(c => c.classList.remove('active'));
+                    const targetContent = document.getElementById(`${target}-content`);
+                    if (targetContent) {
+                        targetContent.classList.add('active');
+                        initializeModule(target);
+                    }
+                });
+            });
+
+            // Init default
+            initializeModule('courses');
+        });
+
+        function initializeModule(moduleName) {
+            switch (moduleName) {
+                case 'courses':
+                    if (window.CoursesModule) CoursesModule.init();
+                    break;
+                case 'classes':
+                    if (window.ClassesModule) ClassesModule.init();
+                    break;
+                case 'certificates':
+                    if (window.CertificatesModule) CertificatesModule.init();
+                    break;
+                case 'validate':
+                    if (window.ValidateModule) ValidateModule.init();
+                    break;
+            }
+        }
+    </script>
+</body>
+
+</html>

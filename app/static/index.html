@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CertifyAPI - Sistema de Gerenciamento de Certificados</title>
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="/static/css/main.css">
+    <link rel="stylesheet" href="/static/css/components.css">
+    <link rel="stylesheet" href="/static/css/modules.css">
+</head>
+
+<body>
+    <!-- Header -->
+    <header class="app-header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <h1>🎓 CertifyAPI</h1>
+                    <span class="version">v1.0.0</span>
+                </div>
+                <div class="header-actions">
+                    <div id="auth-status"></div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Navigation -->
+    <nav class="main-nav">
+        <div class="container">
+            <div class="nav-tabs">
+                <button class="nav-tab active" data-tab-target="home">
+                    Início
+                </button>
+                <button class="nav-tab" data-tab-target="auth">
+                    Autenticação
+                </button>
+                <button class="nav-tab" data-tab-target="certificates">
+                    Buscar Certificados
+                </button>
+                <button class="nav-tab" data-tab-target="validate">
+                    Validação
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="container">
+            <!-- Home Tab -->
+            <div class="tab-content active" id="home-content">
+                <div class="welcome-section">
+                    <h2>Bem-vindo ao CertifyAPI! 🎓</h2>
+                    <p class="lead">Sistema completo de gerenciamento de cursos, turmas e certificados digitais.</p>
+
+                    <div class="features-grid">
+                        <div class="feature-card">
+                            <div class="feature-icon">🔐</div>
+                            <h3>Autenticação Segura</h3>
+                            <p>Sistema de login para administradores e estudantes com JWT</p>
+                        </div>
+                        <div class="feature-card">
+                            <div class="feature-icon">📚</div>
+                            <h3>Gerenciamento de Cursos</h3>
+                            <p>Crie e gerencie cursos com templates personalizados</p>
+                        </div>
+                        <div class="feature-card">
+                            <div class="feature-icon">📜</div>
+                            <h3>Certificados Digitais</h3>
+                            <p>Geração automática de certificados em PDF</p>
+                        </div>
+                    </div>
+
+                    <div class="quick-start">
+                        <h3>Acesso ao Sistema</h3>
+                        <p>Para acessar as funcionalidades completas, faça login:</p>
+                        <button class="btn btn-primary"
+                            onclick="document.querySelector('[data-tab-target=\'auth\']').click()">
+                            Fazer Login / Registrar
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Auth Tab -->
+            <div class="tab-content" id="auth-content"></div>
+
+            <!-- Certificates Tab (Public Search Only) -->
+            <div class="tab-content" id="certificates-content"></div>
+
+            <!-- Validate Tab -->
+            <div class="tab-content" id="validate-content"></div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="app-footer">
+        <div class="container">
+            <p>&copy; 2024 CertifyAPI. Sistema de Gerenciamento de Certificados.</p>
+            <p>
+                <a href="https://github.com/ualcz/CertifyAPI" target="_blank">GitHub</a> |
+                <a href="/docs" target="_blank">API Docs</a>
+            </p>
+        </div>
+    </footer>
+
+    <!-- Core Scripts -->
+    <script src="/static/js/config.js"></script>
+    <script src="/static/js/auth.js"></script>
+    <script src="/static/js/api.js"></script>
+    <script src="/static/js/notifications.js"></script>
+    <script src="/static/js/ui.js"></script>
+
+    <!-- Module Scripts -->
+    <script src="/static/js/modules/auth-module.js"></script>
+    <script src="/static/js/modules/certificates-module.js"></script>
+    <script src="/static/js/modules/validate-module.js"></script>
+
+    <!-- Main App Script -->
+    <script>
+        // Check if already logged in
+        if (AuthManager.isAuthenticated()) {
+            if (AuthManager.isAdmin()) {
+                window.location.href = '/static/admin.html';
+            } else {
+                window.location.href = '/static/student.html';
+            }
+        }
+
+        // Tab Navigation
+        document.addEventListener('DOMContentLoaded', () => {
+            const navTabs = document.querySelectorAll('.nav-tab');
+            const tabContents = document.querySelectorAll('.tab-content');
+
+            navTabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    const target = tab.dataset.tabTarget;
+
+                    // Update active tab
+                    navTabs.forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+
+                    // Update active content
+                    tabContents.forEach(c => c.classList.remove('active'));
+                    const targetContent = document.getElementById(`${target}-content`);
+                    if (targetContent) {
+                        targetContent.classList.add('active');
+
+                        // Initialize module if needed
+                        initializeModule(target);
+                    }
+                });
+            });
+
+            // Initialize home module
+            initializeModule('home');
+        });
+
+        // Module Initialization
+        function initializeModule(moduleName) {
+            switch (moduleName) {
+                case 'auth':
+                    if (window.AuthModule) AuthModule.init();
+                    break;
+                case 'certificates':
+                    if (window.CertificatesModule) CertificatesModule.init();
+                    break;
+                case 'validate':
+                    if (window.ValidateModule) ValidateModule.init();
+                    break;
+            }
+        }
+    </script>
+</body>
+
+</html>

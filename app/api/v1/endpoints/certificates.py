@@ -13,6 +13,7 @@ from app.models.class_model import Class
 from app.models.enrollment import Enrollment
 from app.schemas.certificate import Certificate as CertificateSchema
 from app.services.pdf_service import generate_certificate_pdf, generate_bulk_certificates_zip
+from app.services.templates.registry import TemplateRegistry
 
 router = APIRouter()
 
@@ -193,4 +194,11 @@ def create_single_certificate(
     
     return certificate
 
-
+@router.get("/templates", response_model=List[dict])
+def list_certificate_templates(
+    current_user = Depends(deps.get_current_active_superuser),
+) -> Any:
+    """
+    Listar templates de certificados disponíveis (ADMIN - requer autenticação).
+    """
+    return TemplateRegistry.list_templates()

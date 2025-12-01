@@ -37,6 +37,42 @@ def cleanup_file(file_path: str):
     except Exception as e:
         print(f"✗ Erro ao remover arquivo {file_path}: {e}")
 
+# ========== ENDPOINTS PARA ADMINISTRADORES ==========
+
+@router.get("/", response_model=List[StudentAuth])
+def list_all_students(
+    *,
+    db: Session = Depends(get_db),
+    current_user = Depends(deps.get_current_active_superuser),
+    skip: int = 0,
+    limit: int = 100,
+) -> Any:
+    """
+    Listar todos os estudantes cadastrados (ADMIN - requer autenticação).
+    
+    Permite que administradores visualizem todos os estudantes do sistema
+    com paginação. Útil para gerenciamento e auditoria.
+    
+    **Exemplo de uso:**
+    ```python
+    import requests
+    
+    headers = {"Authorization": f"Bearer {admin_token}"}
+    response = requests.get(
+        "http://localhost:8000/api/v1/students/?skip=0&limit=50",
+        headers=headers
+    )
+    
+    students = response.json()
+    for student in students:
+        print(f"{student['name']} - {student['email']}")
+        print(f"  CPF: {student['cpf']}")
+        print(f"  Autorizado: {student['authorized']}\n")
+    ```
+    """
+    students = db.query(Student).offset(skip).limit(limit).all()
+    return students
+
 # ========== ENDPOINT PÚBLICO DE CONSULTA DE CERTIFICADOS ==========
 
 @router.get("/cpf/{cpf}/certificates", response_model=StudentCertificatesResponse)

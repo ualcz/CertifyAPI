@@ -90,20 +90,6 @@ def read_courses_with_classes(
     
     return result
 
-@router.get("/{course_id}", response_model=CourseSchema)
-def read_course(
-    *,
-    db: Session = Depends(get_db),
-    course_id: int,
-) -> Any:
-    """
-    Obter detalhes de um curso específico (PÚBLICO - sem autenticação).
-    """
-    course = db.query(Course).filter(Course.id == course_id, Course.is_active == True).first()
-    if not course:
-        raise HTTPException(status_code=404, detail="Course not found")
-    return course
-
 @router.put("/{course_id}", response_model=CourseSchema)
 def update_course(
     *,

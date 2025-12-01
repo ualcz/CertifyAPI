@@ -15,14 +15,6 @@ from app.services.templates.registry import TemplateRegistry
 
 router = APIRouter()
 
-@router.get("/templates", response_model=List[dict])
-def list_certificate_templates(
-    current_user = Depends(deps.get_current_active_superuser),
-) -> Any:
-    """
-    Listar templates de certificados disponíveis (ADMIN - requer autenticação).
-    """
-    return TemplateRegistry.list_templates()
 
 @router.post("/", response_model=ClassSchema)
 def create_class(
@@ -83,42 +75,6 @@ def create_class(
     
     return class_obj
 
-@router.get("/course/{course_id}", response_model=List[ClassWithCourse])
-def get_classes_by_course(
-    *,
-    db: Session = Depends(get_db),
-    course_id: int,
-) -> Any:
-    """
-    Listar todas as turmas de um curso específico (PÚBLICO - sem autenticação).
-    
-    Endpoint público que permite visualizar todas as turmas disponíveis
-    para um curso, mostrando vagas disponíveis e alunos inscritos
-    
-    # Listar turmas do curso ID 1
-    response = requests.get("http://localhost:8000/api/v1/classes/course/1")
-    turmas = response.json()
-    
-    for turma in turmas:
-        print(f"{turma['name']}: {turma['available_slots']} vagas disponíveis")
-    ```
-    """
-    course = db.query(Course).filter(Course.id == course_id, Course.is_active == True).first()
-    if not course:
-        raise HTTPException(status_code=404, detail="Course not found")
-    
-    classes = db.query(Class).filter(Class.course_id == course_id, Class.is_active == True).all()
-    
-    result = []
-    for class_obj in classes:
-        enrolled_count = db.query(Enrollment).filter(Enrollment.class_id == class_obj.id).count()
-        result.append({
-            **class_obj.__dict__,
-            "course_name": course.name,
-            "enrolled_students": enrolled_count
-        })
-    
-    return result
 
 @router.get("/{class_id}", response_model=ClassSchema)
 def get_class(

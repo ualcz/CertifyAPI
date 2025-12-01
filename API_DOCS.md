@@ -1188,4 +1188,4 @@ Para dúvidas ou problemas, consulte:
 ---
 
 **Versão da API:** 1.0.0  
-**Última atualização:** 01/12/2024
+**Última atualização:** 01/12/2025
